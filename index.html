@@ -1,1 +1,1241 @@
-print "hello wordl"
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Métodos Numéricos - Raíces de Ecuaciones</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 2rem 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+
+        h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2rem;
+        }
+
+        nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+
+        .section {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            color: #34495e;
+            font-size: 1.4rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .method-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 5px solid #667eea;
+        }
+
+        .input-group {
+            margin: 1rem 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .results {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #e8f4fd;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+        }
+
+        .chart-container {
+            margin: 2rem 0;
+            height: 400px;
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin: 1rem 0;
+            box-shadow: 0 4px 20px rgba(116, 185, 255, 0.3);
+        }
+
+        .formula {
+            background: #2d3436;
+            color: #00cec9;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        @media (max-width: 768px) {
+            .nav-buttons {
+                flex-direction: column;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Métodos Numéricos</h1>
+            <p class="subtitle">Raíces de Ecuaciones - Aplicado al Mundo Real</p>
+        </header>
+
+        <nav>
+            <div class="nav-buttons">
+                <button class="nav-btn active" onclick="showSection('info')">Información del Tema</button>
+                <button class="nav-btn" onclick="showSection('engineering')">Ingeniería Estructural</button>
+                <button class="nav-btn" onclick="showSection('economics')">Economía Financiera</button>
+                <button class="nav-btn" onclick="showSection('physics')">Física Orbital</button>
+            </div>
+        </nav>
+
+        <!-- Información del Tema -->
+        <section id="info" class="section active">
+            <h2>🔢 Información sobre Raíces de Ecuaciones</h2>
+            
+            <div class="info-box">
+                <h3>¿Qué son las Raíces de Ecuaciones?</h3>
+                <p>Las raíces de una ecuación son los valores de x que hacen que f(x) = 0. Encontrar estas raíces es fundamental en ingeniería, física, economía y muchas otras áreas.</p>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>🎯 Método de Bisección</h3>
+                    <p><strong>Principio:</strong> Divide el intervalo por la mitad repetidamente</p>
+                    <div class="formula">f(a) × f(b) < 0 → raíz en [a,b]<br>c = (a + b) / 2</div>
+                    <p><strong>Ventajas:</strong> Siempre converge, muy estable</p>
+                    <p><strong>Desventajas:</strong> Convergencia lenta</p>
+                </div>
+
+                <div class="card">
+                    <h3>🚀 Método de Newton-Raphson</h3>
+                    <p><strong>Principio:</strong> Usa la tangente para aproximar la raíz</p>
+                    <div class="formula">x₁ = x₀ - f(x₀)/f'(x₀)</div>
+                    <p><strong>Ventajas:</strong> Convergencia muy rápida</p>
+                    <p><strong>Desventajas:</strong> Necesita la derivada, puede no converger</p>
+                </div>
+
+                <div class="card">
+                    <h3>🔄 Método de la Secante</h3>
+                    <p><strong>Principio:</strong> Aproxima la derivada con diferencias finitas</p>
+                    <div class="formula">x₂ = x₁ - f(x₁)×(x₁-x₀)/(f(x₁)-f(x₀))</div>
+                    <p><strong>Ventajas:</strong> No necesita derivada, rápida convergencia</p>
+                    <p><strong>Desventajas:</strong> Menos estable que Newton</p>
+                </div>
+
+                <div class="card">
+                    <h3>🎨 Método de Regula Falsi</h3>
+                    <p><strong>Principio:</strong> Combina bisección con interpolación lineal</p>
+                    <div class="formula">c = a - f(a)×(b-a)/(f(b)-f(a))</div>
+                    <p><strong>Ventajas:</strong> Más rápido que bisección, siempre converge</p>
+                    <p><strong>Desventajas:</strong> Convergencia más lenta que Newton</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Aplicación 1: Ingeniería Estructural -->
+        <section id="engineering" class="section">
+            <h2>🏗️ Aplicación 1: Análisis de Vigas en Ingeniería Estructural</h2>
+            
+            <div class="info-box">
+                <h3>Problema Real</h3>
+                <p>En el diseño de puentes y edificios, necesitamos encontrar las deflexiones máximas de vigas bajo cargas distribuidas. La ecuación de deflexión es compleja y requiere métodos numéricos para encontrar los puntos críticos.</p>
+            </div>
+
+            <div class="method-container">
+                <h3>Parámetros de la Viga</h3>
+                <div class="grid">
+                    <div class="input-group">
+                        <label>Longitud de la viga (m):</label>
+                        <input type="number" id="beam-length" value="10" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label>Carga distribuida (kN/m):</label>
+                        <input type="number" id="distributed-load" value="50" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Módulo de elasticidad E (GPa):</label>
+                        <input type="number" id="elasticity-modulus" value="200" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Momento de inercia I (m⁴):</label>
+                        <input type="number" id="moment-inertia" value="0.001" step="0.0001">
+                    </div>
+                </div>
+
+                <h3>Método de Solución</h3>
+                <div class="input-group">
+                    <label>Seleccionar método:</label>
+                    <select id="engineering-method">
+                        <option value="bisection">Bisección</option>
+                        <option value="newton">Newton-Raphson</option>
+                        <option value="secant">Secante</option>
+                        <option value="regula">Regula Falsi</option>
+                    </select>
+                </div>
+
+                <button onclick="solveEngineering()">Calcular Deflexión Máxima</button>
+                <button onclick="plotEngineeringGraph()">Mostrar Gráfica</button>
+
+                <div id="engineering-results" class="results" style="display:none;"></div>
+                <div id="engineering-chart" class="chart-container">
+                    <canvas id="engineeringCanvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Aplicación 2: Economía Financiera -->
+        <section id="economics" class="section">
+            <h2>💰 Aplicación 2: Tasa Interna de Retorno (TIR) en Inversiones</h2>
+            
+            <div class="info-box">
+                <h3>Problema Real</h3>
+                <p>Los analistas financieros necesitan calcular la TIR de proyectos de inversión para tomar decisiones. La TIR es la tasa que hace que el VPN sea cero, y se debe resolver numéricamente.</p>
+            </div>
+
+            <div class="method-container">
+                <h3>Flujos de Caja del Proyecto</h3>
+                <div class="grid">
+                    <div class="input-group">
+                        <label>Inversión inicial (miles $):</label>
+                        <input type="number" id="initial-investment" value="-1000" step="10">
+                    </div>
+                    <div class="input-group">
+                        <label>Flujo año 1 (miles $):</label>
+                        <input type="number" id="flow-1" value="300" step="10">
+                    </div>
+                    <div class="input-group">
+                        <label>Flujo año 2 (miles $):</label>
+                        <input type="number" id="flow-2" value="400" step="10">
+                    </div>
+                    <div class="input-group">
+                        <label>Flujo año 3 (miles $):</label>
+                        <input type="number" id="flow-3" value="500" step="10">
+                    </div>
+                    <div class="input-group">
+                        <label>Flujo año 4 (miles $):</label>
+                        <input type="number" id="flow-4" value="600" step="10">
+                    </div>
+                </div>
+
+                <h3>Método de Solución</h3>
+                <div class="input-group">
+                    <label>Seleccionar método:</label>
+                    <select id="economics-method">
+                        <option value="bisection">Bisección</option>
+                        <option value="newton">Newton-Raphson</option>
+                        <option value="secant">Secante</option>
+                        <option value="regula">Regula Falsi</option>
+                    </select>
+                </div>
+
+                <button onclick="solveEconomics()">Calcular TIR</button>
+                <button onclick="plotEconomicsGraph()">Mostrar Gráfica VPN vs Tasa</button>
+
+                <div id="economics-results" class="results" style="display:none;"></div>
+                <div id="economics-chart" class="chart-container">
+                    <canvas id="economicsCanvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Aplicación 3: Física Orbital -->
+        <section id="physics" class="section">
+            <h2>🚀 Aplicación 3: Órbitas Satelitales y Ecuación de Kepler</h2>
+            
+            <div class="info-box">
+                <h3>Problema Real</h3>
+                <p>En la mecánica orbital, necesitamos resolver la ecuación de Kepler para determinar la posición de satélites y planetas. Esta ecuación trascendente no tiene solución analítica y requiere métodos numéricos.</p>
+            </div>
+
+            <div class="method-container">
+                <h3>Parámetros Orbitales</h3>
+                <div class="grid">
+                    <div class="input-group">
+                        <label>Excentricidad (e):</label>
+                        <input type="number" id="eccentricity" value="0.3" step="0.01" min="0" max="0.99">
+                    </div>
+                    <div class="input-group">
+                        <label>Anomalía media (M) en radianes:</label>
+                        <input type="number" id="mean-anomaly" value="1.5" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label>Tolerancia:</label>
+                        <input type="number" id="tolerance" value="0.000001" step="0.000001">
+                    </div>
+                </div>
+
+                <h3>Método de Solución</h3>
+                <div class="input-group">
+                    <label>Seleccionar método:</label>
+                    <select id="physics-method">
+                        <option value="bisection">Bisección</option>
+                        <option value="newton">Newton-Raphson</option>
+                        <option value="secant">Secante</option>
+                        <option value="regula">Regula Falsi</option>
+                    </select>
+                </div>
+
+                <button onclick="solvePhysics()">Resolver Ecuación de Kepler</button>
+                <button onclick="plotPhysicsGraph()">Mostrar Órbita</button>
+
+                <div id="physics-results" class="results" style="display:none;"></div>
+                <div id="physics-chart" class="chart-container">
+                    <canvas id="physicsCanvas"></canvas>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Variables globales para gráficas
+        let engineeringChart, economicsChart, physicsChart;
+
+        // Función para mostrar secciones
+        function showSection(sectionId) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remover clase active de todos los botones
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mostrar la sección seleccionada
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Activar el botón correspondiente
+            event.target.classList.add('active');
+        }
+
+        // Métodos numéricos base
+        function bisection(func, a, b, tolerance = 1e-6, maxIter = 100) {
+            if (func(a) * func(b) >= 0) {
+                throw new Error("La función debe tener signos opuestos en los extremos del intervalo");
+            }
+            
+            let iterations = [];
+            let iter = 0;
+            
+            while (Math.abs(b - a) > tolerance && iter < maxIter) {
+                let c = (a + b) / 2;
+                let fc = func(c);
+                
+                iterations.push({
+                    iteration: iter + 1,
+                    a: a.toFixed(6),
+                    b: b.toFixed(6),
+                    c: c.toFixed(6),
+                    fc: fc.toFixed(6),
+                    error: Math.abs(b - a).toFixed(6)
+                });
+                
+                if (Math.abs(fc) < tolerance) break;
+                
+                if (func(a) * fc < 0) {
+                    b = c;
+                } else {
+                    a = c;
+                }
+                iter++;
+            }
+            
+            return {
+                root: (a + b) / 2,
+                iterations: iterations,
+                converged: iter < maxIter
+            };
+        }
+
+        function newton(func, dfunc, x0, tolerance = 1e-6, maxIter = 100) {
+            let iterations = [];
+            let x = x0;
+            let iter = 0;
+            
+            while (iter < maxIter) {
+                let fx = func(x);
+                let dfx = dfunc(x);
+                
+                if (Math.abs(dfx) < 1e-12) {
+                    throw new Error("Derivada muy pequeña, el método puede no converger");
+                }
+                
+                let x_new = x - fx / dfx;
+                let error = Math.abs(x_new - x);
+                
+                iterations.push({
+                    iteration: iter + 1,
+                    x: x.toFixed(6),
+                    fx: fx.toFixed(6),
+                    dfx: dfx.toFixed(6),
+                    x_new: x_new.toFixed(6),
+                    error: error.toFixed(6)
+                });
+                
+                if (error < tolerance) break;
+                
+                x = x_new;
+                iter++;
+            }
+            
+            return {
+                root: x,
+                iterations: iterations,
+                converged: iter < maxIter
+            };
+        }
+
+        function secant(func, x0, x1, tolerance = 1e-6, maxIter = 100) {
+            let iterations = [];
+            let iter = 0;
+            
+            while (iter < maxIter) {
+                let fx0 = func(x0);
+                let fx1 = func(x1);
+                
+                if (Math.abs(fx1 - fx0) < 1e-12) {
+                    throw new Error("División por cero en el método de la secante");
+                }
+                
+                let x2 = x1 - fx1 * (x1 - x0) / (fx1 - fx0);
+                let error = Math.abs(x2 - x1);
+                
+                iterations.push({
+                    iteration: iter + 1,
+                    x0: x0.toFixed(6),
+                    x1: x1.toFixed(6),
+                    fx0: fx0.toFixed(6),
+                    fx1: fx1.toFixed(6),
+                    x2: x2.toFixed(6),
+                    error: error.toFixed(6)
+                });
+                
+                if (error < tolerance) {
+                    return {
+                        root: x2,
+                        iterations: iterations,
+                        converged: true
+                    };
+                }
+                
+                x0 = x1;
+                x1 = x2;
+                iter++;
+            }
+            
+            return {
+                root: x1,
+                iterations: iterations,
+                converged: false
+            };
+        }
+
+        function regulaFalsi(func, a, b, tolerance = 1e-6, maxIter = 100) {
+            if (func(a) * func(b) >= 0) {
+                throw new Error("La función debe tener signos opuestos en los extremos del intervalo");
+            }
+            
+            let iterations = [];
+            let iter = 0;
+            let c_prev = a;
+            
+            while (iter < maxIter) {
+                let fa = func(a);
+                let fb = func(b);
+                let c = a - fa * (b - a) / (fb - fa);
+                let fc = func(c);
+                
+                let error = Math.abs(c - c_prev);
+                
+                iterations.push({
+                    iteration: iter + 1,
+                    a: a.toFixed(6),
+                    b: b.toFixed(6),
+                    c: c.toFixed(6),
+                    fc: fc.toFixed(6),
+                    error: error.toFixed(6)
+                });
+                
+                if (Math.abs(fc) < tolerance || error < tolerance) {
+                    return {
+                        root: c,
+                        iterations: iterations,
+                        converged: true
+                    };
+                }
+                
+                if (fa * fc < 0) {
+                    b = c;
+                } else {
+                    a = c;
+                }
+                
+                c_prev = c;
+                iter++;
+            }
+            
+            return {
+                root: (a + b) / 2,
+                iterations: iterations,
+                converged: false
+            };
+        }
+
+        // Aplicación 1: Ingeniería Estructural
+        function solveEngineering() {
+            const L = parseFloat(document.getElementById('beam-length').value);
+            const w = parseFloat(document.getElementById('distributed-load').value);
+            const E = parseFloat(document.getElementById('elasticity-modulus').value) * 1e9; // GPa to Pa
+            const I = parseFloat(document.getElementById('moment-inertia').value);
+            const method = document.getElementById('engineering-method').value;
+            
+            // Ecuación de deflexión: d²y/dx² = -wx(L-x)/(2EI)
+            // La deflexión máxima ocurre donde dy/dx = 0
+            // dy/dx = -w/(6EI) * (3Lx² - 2x³ - L³)
+            function deflectionDerivative(x) {
+                return -w / (6 * E * I) * (3 * L * x * x - 2 * x * x * x - L * L * L);
+            }
+            
+            function deflectionSecondDerivative(x) {
+                return -w / (6 * E * I) * (6 * L * x - 6 * x * x);
+            }
+            
+            try {
+                let result;
+                const resultsDiv = document.getElementById('engineering-results');
+                
+                switch(method) {
+                    case 'bisection':
+                        result = bisection(deflectionDerivative, 0.1, L - 0.1);
+                        break;
+                    case 'newton':
+                        result = newton(deflectionDerivative, deflectionSecondDerivative, L/2);
+                        break;
+                    case 'secant':
+                        result = secant(deflectionDerivative, L/3, 2*L/3);
+                        break;
+                    case 'regula':
+                        result = regulaFalsi(deflectionDerivative, 0.1, L - 0.1);
+                        break;
+                }
+                
+                const x_max = result.root;
+                const y_max = -w * x_max * (L*L*L - 2*L*x_max*x_max + x_max*x_max*x_max) / (24 * E * I);
+                
+                resultsDiv.innerHTML = `
+                    <h3>Resultados del Análisis Estructural</h3>
+                    <p><strong>Método utilizado:</strong> ${method.charAt(0).toUpperCase() + method.slice(1)}</p>
+                    <p><strong>Posición de deflexión máxima:</strong> ${x_max.toFixed(4)} m</p>
+                    <p><strong>Deflexión máxima:</strong> ${(y_max * 1000).toFixed(4)} mm</p>
+                    <p><strong>Convergencia:</strong> <span class="${result.converged ? 'success' : 'error'}">${result.converged ? 'Sí' : 'No'}</span></p>
+                    <p><strong>Iteraciones:</strong> ${result.iterations.length}</p>
+                    
+                    <h4>Tabla de Iteraciones:</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Iteración</th>
+                                <th>x</th>
+                                <th>f(x)</th>
+                                <th>Error</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.iterations.map(iter => `
+                                <tr>
+                                    <td>${iter.iteration}</td>
+                                    <td>${iter.c || iter.x_new || iter.x2 || iter.x}</td>
+                                    <td>${iter.fc || iter.fx || iter.fx1}</td>
+                                    <td>${iter.error}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                resultsDiv.style.display = 'block';
+                
+            } catch (error) {
+                document.getElementById('engineering-results').innerHTML = `
+                    <h3>Error en el Cálculo</h3>
+                    <p class="error">${error.message}</p>
+                `;
+                document.getElementById('engineering-results').style.display = 'block';
+            }
+        }
+
+        function plotEngineeringGraph() {
+            const L = parseFloat(document.getElementById('beam-length').value);
+            const w = parseFloat(document.getElementById('distributed-load').value);
+            const E = parseFloat(document.getElementById('elasticity-modulus').value) * 1e9;
+            const I = parseFloat(document.getElementById('moment-inertia').value);
+            
+            const ctx = document.getElementById('engineeringCanvas').getContext('2d');
+            
+            if (engineeringChart) {
+                engineeringChart.destroy();
+            }
+            
+            // Generar datos para la gráfica de deflexión
+            const points = 100;
+            const xData = [];
+            const yData = [];
+            
+            for (let i = 0; i <= points; i++) {
+                const x = (i / points) * L;
+                const y = -w * x * (L*L*L - 2*L*x*x + x*x*x) / (24 * E * I);
+                xData.push(x);
+                yData.push(y * 1000); // Convertir a mm
+            }
+            
+            engineeringChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: xData.map(x => x.toFixed(2)),
+                    datasets: [{
+                        label: 'Deflexión de la Viga (mm)',
+                        data: yData,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Deflexión de la Viga a lo largo de su Longitud'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Posición (m)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Deflexión (mm)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Aplicación 2: Economía Financiera
+        function solveEconomics() {
+            const flows = [
+                parseFloat(document.getElementById('initial-investment').value),
+                parseFloat(document.getElementById('flow-1').value),
+                parseFloat(document.getElementById('flow-2').value),
+                parseFloat(document.getElementById('flow-3').value),
+                parseFloat(document.getElementById('flow-4').value)
+            ];
+            const method = document.getElementById('economics-method').value;
+            
+            // Función VPN
+            function npv(rate) {
+                let sum = flows[0]; // Inversión inicial
+                for (let i = 1; i < flows.length; i++) {
+                    sum += flows[i] / Math.pow(1 + rate, i);
+                }
+                return sum;
+            }
+            
+            // Derivada del VPN
+            function dnpv(rate) {
+                let sum = 0;
+                for (let i = 1; i < flows.length; i++) {
+                    sum -= i * flows[i] / Math.pow(1 + rate, i + 1);
+                }
+                return sum;
+            }
+            
+            try {
+                let result;
+                const resultsDiv = document.getElementById('economics-results');
+                
+                switch(method) {
+                    case 'bisection':
+                        // Buscar intervalo donde cambia de signo
+                        let a = 0.01, b = 1.0;
+                        while (npv(a) * npv(b) > 0 && b < 2.0) {
+                            b += 0.1;
+                        }
+                        result = bisection(npv, a, b);
+                        break;
+                    case 'newton':
+                        result = newton(npv, dnpv, 0.15);
+                        break;
+                    case 'secant':
+                        result = secant(npv, 0.1, 0.2);
+                        break;
+                    case 'regula':
+                        let a2 = 0.01, b2 = 1.0;
+                        while (npv(a2) * npv(b2) > 0 && b2 < 2.0) {
+                            b2 += 0.1;
+                        }
+                        result = regulaFalsi(npv, a2, b2);
+                        break;
+                }
+                
+                const tir = result.root * 100; // Convertir a porcentaje
+                
+                resultsDiv.innerHTML = `
+                    <h3>Resultados del Análisis Financiero</h3>
+                    <p><strong>Método utilizado:</strong> ${method.charAt(0).toUpperCase() + method.slice(1)}</p>
+                    <p><strong>Tasa Interna de Retorno (TIR):</strong> ${tir.toFixed(4)}%</p>
+                    <p><strong>VPN en la TIR:</strong> ${npv(result.root).toFixed(2)} (miles)</p>
+                    <p><strong>Convergencia:</strong> <span class="${result.converged ? 'success' : 'error'}">${result.converged ? 'Sí' : 'No'}</span></p>
+                    <p><strong>Iteraciones:</strong> ${result.iterations.length}</p>
+                    
+                    <h4>Interpretación:</h4>
+                    <p>${tir > 12 ? '<span class="success">El proyecto es rentable si el costo de capital es menor al ' + tir.toFixed(2) + '%</span>' : '<span class="error">El proyecto puede no ser rentable con tasas de descuento típicas</span>'}</p>
+                    
+                    <h4>Tabla de Iteraciones:</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Iteración</th>
+                                <th>Tasa (%)</th>
+                                <th>VPN</th>
+                                <th>Error</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.iterations.map(iter => {
+                                const rate = parseFloat(iter.c || iter.x_new || iter.x2 || iter.x) * 100;
+                                const npvVal = npv(parseFloat(iter.c || iter.x_new || iter.x2 || iter.x));
+                                return `
+                                    <tr>
+                                        <td>${iter.iteration}</td>
+                                        <td>${rate.toFixed(4)}</td>
+                                        <td>${npvVal.toFixed(2)}</td>
+                                        <td>${iter.error}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+                resultsDiv.style.display = 'block';
+                
+            } catch (error) {
+                document.getElementById('economics-results').innerHTML = `
+                    <h3>Error en el Cálculo</h3>
+                    <p class="error">${error.message}</p>
+                `;
+                document.getElementById('economics-results').style.display = 'block';
+            }
+        }
+
+        function plotEconomicsGraph() {
+            const flows = [
+                parseFloat(document.getElementById('initial-investment').value),
+                parseFloat(document.getElementById('flow-1').value),
+                parseFloat(document.getElementById('flow-2').value),
+                parseFloat(document.getElementById('flow-3').value),
+                parseFloat(document.getElementById('flow-4').value)
+            ];
+            
+            const ctx = document.getElementById('economicsCanvas').getContext('2d');
+            
+            if (economicsChart) {
+                economicsChart.destroy();
+            }
+            
+            // Función VPN
+            function npv(rate) {
+                let sum = flows[0];
+                for (let i = 1; i < flows.length; i++) {
+                    sum += flows[i] / Math.pow(1 + rate, i);
+                }
+                return sum;
+            }
+            
+            // Generar datos para la gráfica
+            const rates = [];
+            const npvValues = [];
+            
+            for (let r = 0; r <= 0.5; r += 0.01) {
+                rates.push(r * 100);
+                npvValues.push(npv(r));
+            }
+            
+            economicsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: rates.map(r => r.toFixed(1)),
+                    datasets: [{
+                        label: 'VPN (miles $)',
+                        data: npvValues,
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Línea de Cero',
+                        data: new Array(rates.length).fill(0),
+                        borderColor: '#2c3e50',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Valor Presente Neto vs Tasa de Descuento'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tasa de Descuento (%)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'VPN (miles $)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Aplicación 3: Física Orbital
+        function solvePhysics() {
+            const e = parseFloat(document.getElementById('eccentricity').value);
+            const M = parseFloat(document.getElementById('mean-anomaly').value);
+            const tolerance = parseFloat(document.getElementById('tolerance').value);
+            const method = document.getElementById('physics-method').value;
+            
+            // Ecuación de Kepler: E - e*sin(E) - M = 0
+            function keplerEquation(E) {
+                return E - e * Math.sin(E) - M;
+            }
+            
+            // Derivada de la ecuación de Kepler
+            function dKeplerEquation(E) {
+                return 1 - e * Math.cos(E);
+            }
+            
+            try {
+                let result;
+                const resultsDiv = document.getElementById('physics-results');
+                
+                switch(method) {
+                    case 'bisection':
+                        // El rango típico para E es [0, 2π]
+                        result = bisection(keplerEquation, 0, 2 * Math.PI, tolerance);
+                        break;
+                    case 'newton':
+                        // Aproximación inicial: E₀ = M + e*sin(M)
+                        const E0 = M + e * Math.sin(M);
+                        result = newton(keplerEquation, dKeplerEquation, E0, tolerance);
+                        break;
+                    case 'secant':
+                        const E1 = M;
+                        const E2 = M + e * Math.sin(M);
+                        result = secant(keplerEquation, E1, E2, tolerance);
+                        break;
+                    case 'regula':
+                        result = regulaFalsi(keplerEquation, 0, 2 * Math.PI, tolerance);
+                        break;
+                }
+                
+                const E = result.root;
+                // Calcular anomalía verdadera
+                const nu = 2 * Math.atan2(
+                    Math.sqrt(1 + e) * Math.sin(E/2),
+                    Math.sqrt(1 - e) * Math.cos(E/2)
+                );
+                
+                // Calcular radio vector
+                const r = 1 - e * Math.cos(E); // En unidades de semieje mayor
+                
+                resultsDiv.innerHTML = `
+                    <h3>Resultados del Análisis Orbital</h3>
+                    <p><strong>Método utilizado:</strong> ${method.charAt(0).toUpperCase() + method.slice(1)}</p>
+                    <p><strong>Anomalía excéntrica (E):</strong> ${E.toFixed(6)} rad (${(E * 180 / Math.PI).toFixed(2)}°)</p>
+                    <p><strong>Anomalía verdadera (ν):</strong> ${nu.toFixed(6)} rad (${(nu * 180 / Math.PI).toFixed(2)}°)</p>
+                    <p><strong>Radio vector (r/a):</strong> ${r.toFixed(6)}</p>
+                    <p><strong>Verificación (E - e·sin(E) - M):</strong> ${keplerEquation(E).toExponential(3)}</p>
+                    <p><strong>Convergencia:</strong> <span class="${result.converged ? 'success' : 'error'}">${result.converged ? 'Sí' : 'No'}</span></p>
+                    <p><strong>Iteraciones:</strong> ${result.iterations.length}</p>
+                    
+                    <h4>Interpretación Física:</h4>
+                    <p>• La posición del satélite en su órbita ha sido determinada con precisión.</p>
+                    <p>• Radio vector: ${r < 1 ? 'El satélite está más cerca del foco (periapsis)' : 'El satélite está más lejos del foco (apoapsis)'}</p>
+                    
+                    <h4>Tabla de Iteraciones:</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Iteración</th>
+                                <th>E (rad)</th>
+                                <th>f(E)</th>
+                                <th>Error</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${result.iterations.map(iter => `
+                                <tr>
+                                    <td>${iter.iteration}</td>
+                                    <td>${iter.c || iter.x_new || iter.x2 || iter.x}</td>
+                                    <td>${iter.fc || iter.fx || iter.fx1}</td>
+                                    <td>${iter.error}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                resultsDiv.style.display = 'block';
+                
+            } catch (error) {
+                document.getElementById('physics-results').innerHTML = `
+                    <h3>Error en el Cálculo</h3>
+                    <p class="error">${error.message}</p>
+                `;
+                document.getElementById('physics-results').style.display = 'block';
+            }
+        }
+
+        function plotPhysicsGraph() {
+            const e = parseFloat(document.getElementById('eccentricity').value);
+            const M = parseFloat(document.getElementById('mean-anomaly').value);
+            
+            const ctx = document.getElementById('physicsCanvas').getContext('2d');
+            
+            if (physicsChart) {
+                physicsChart.destroy();
+            }
+            
+            // Generar puntos de la órbita
+            const points = 100;
+            const orbitX = [];
+            const orbitY = [];
+            const currentX = [];
+            const currentY = [];
+            
+            // Órbita completa
+            for (let i = 0; i <= points; i++) {
+                const E = (i / points) * 2 * Math.PI;
+                const r = 1 - e * Math.cos(E);
+                const x = r * Math.cos(E);
+                const y = r * Math.sin(E);
+                orbitX.push(x);
+                orbitY.push(y);
+            }
+            
+            // Posición actual
+            function keplerEquation(E) {
+                return E - e * Math.sin(E) - M;
+            }
+            
+            // Resolver para la posición actual usando Newton-Raphson
+            let E_current = M + e * Math.sin(M);
+            for (let i = 0; i < 10; i++) {
+                const f = keplerEquation(E_current);
+                const df = 1 - e * Math.cos(E_current);
+                E_current = E_current - f / df;
+            }
+            
+            const r_current = 1 - e * Math.cos(E_current);
+            const x_current = r_current * Math.cos(E_current);
+            const y_current = r_current * Math.sin(E_current);
+            
+            currentX.push(x_current);
+            currentY.push(y_current);
+            
+            physicsChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Órbita Elíptica',
+                        data: orbitX.map((x, i) => ({x: x, y: orbitY[i]})),
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 1,
+                        showLine: true,
+                        fill: false
+                    }, {
+                        label: 'Foco (Cuerpo Central)',
+                        data: [{x: 0, y: 0}],
+                        backgroundColor: '#f39c12',
+                        borderColor: '#e67e22',
+                        pointRadius: 8,
+                        pointStyle: 'star'
+                    }, {
+                        label: 'Posición Actual del Satélite',
+                        data: [{x: x_current, y: y_current}],
+                        backgroundColor: '#e74c3c',
+                        borderColor: '#c0392b',
+                        pointRadius: 6,
+                        pointStyle: 'circle'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Órbita Elíptica (e = ${e}, M = ${M.toFixed(2)} rad)`
+                        },
+                        legend: {
+                            display: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'center',
+                            title: {
+                                display: true,
+                                text: 'x (unidades del semieje mayor)'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'center',
+                            title: {
+                                display: true,
+                                text: 'y (unidades del semieje mayor)'
+                            }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            hitRadius: 10
+                        }
+                    }
+                }
+            });
+        }
+
+        // Inicializar gráficas cuando se carga la página
+        window.onload = function() {
+            plotEngineeringGraph();
+            plotEconomicsGraph();
+            plotPhysicsGraph();
+        };
+    </script>
+</body>
+</html>
